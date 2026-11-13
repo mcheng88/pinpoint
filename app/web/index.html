@@ -599,6 +599,11 @@ function render(r, turn, question){
   } else if (r.kind === 'intake'){
     needBox(r, turn);
     if (!r.need?.length) turn.append(el('p', 'said', 'All five case facts are set.'));
+  } else if (r.kind === 'recorded'){          // only in the recorded demo (web/demo.js): a question that was not recorded
+    const d = el('div', 'none', '<b>This is a recorded demo.</b><p>No model runs here, so only the questions that were recorded can be shown.</p>');
+    const chips = el('div', 'chips');
+    for (const q of r.can.filter(q => !asked.has(q))){ const b = el('button', '', esc(q)); b.type = 'button'; b.onclick = () => send(q); chips.append(b); }
+    d.append(chips); turn.append(d);
   } else if (r.kind === 'advice'){
     turn.append(el('div', 'none', `<b>I don’t give advice on a case.</b><p>Ask me what the rule says and I’ll find it. What to do for your client is your call.</p>`));
   } else {

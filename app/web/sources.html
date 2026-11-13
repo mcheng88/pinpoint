@@ -147,7 +147,7 @@ $('find').oninput = () => {
     if (q.length < 2){ $('found').innerHTML = ''; $('find-count').textContent = ''; return; }
     const r = await (await fetch('/api/find?q=' + encodeURIComponent(q))).json();
     if ($('find').value.trim().toLowerCase() !== q) return;            // a newer search is on its way
-    $('find-count').textContent = r.count ? `${r.count} passage${r.count === 1 ? '' : 's'}${r.count > r.rows.length ? ', first ' + r.rows.length + ' shown' : ''}` : 'No passage has these words';
+    $('find-count').textContent = r.note ? r.note : r.count ? `${r.count} passage${r.count === 1 ? '' : 's'}${r.count > r.rows.length ? ', first ' + r.rows.length + ' shown' : ''}` : 'No passage has these words';
     $('found').innerHTML = r.rows.map(p =>
       `<div class="item"><div class="row"><a href="${esc(p.url)}" target="_blank" rel="noopener"><b>${esc(p.cite)}</b></a><span class="muted">${esc(p.source)}</span></div>` +
       `<span>${esc(p.part).replace(/\x01/g, '<mark>').replace(/\x02/g, '</mark>')}</span></div>`).join('');

@@ -4,6 +4,30 @@ A case research tool for helpline advocates who work on Medicaid managed care ca
 
 Built for the [AI for Health Equity Design Sprint](https://datascience.columbia.edu/events/ai-health-equity-design-sprint), hosted by the Data Science Institute at Columbia University in November 2026, with the [Community Service Society of New York](https://www.cssny.org/) as community partner. Every case detail used with Pinpoint is made up.
 
+**Recorded demo:** https://pinpoint.mcheng.dev. The two screens with answers recorded from the running tool on 2026-11-13. No model or server is behind it: pick one of the suggested questions and its recorded answer plays back. Cases, grades and outcomes are kept in your own browser.
+
+## What it looks like
+
+The case record: an advocate's own reference and five case facts.
+
+![Starting a case and setting its five facts](docs/img/case-record.gif)
+
+Research: a question, a short written summary, and each citation opened in the source.
+
+![Asking a question and opening a citation in the source](docs/img/research.gif)
+
+Grades and the outcome of the case.
+
+![Grading an answer, saving a rule and recording the outcome](docs/img/grades-and-outcome.gif)
+
+An answer with one of its citations open in the source:
+
+![An answer with the cited rule open beside it](docs/img/answer-with-source.png)
+
+Keyword search across every approved source, with no model:
+
+![Searching the sources for "payor of last resort"](docs/img/sources-search.png)
+
 ## What it does
 
 - **Case record.** A case has the advocate's own reference and five case facts (plan type, what happened, service at issue, notice received, services still in place), plus an outcome. There is no field for a name, an ID number or an address.
@@ -34,6 +58,8 @@ PINPOINT_LLM=openai:<model id>                 # any service that speaks OpenAI'
 ## What is in this repository
 
 - `app/`: the server, search, redaction, summary writing, case record and the two screens.
+- `app/record_demo.py`, `app/build_demo.py`, `app/web/demo.js`: record answers from a running copy and build the recorded demo.
+- `demo/recording.json`: the recording. `docs/`: the recorded demo as built, and the images above.
 - `data/ecfr/`: two federal regulations (42 CFR Part 438 and Part 431 Subpart E) as published on ecfr.gov, to build a first database from. More sources are added on the Sources screen.
 
 The question sets used to test the tool, and the list of sources the helpline supplied, belong to CSSNY and are not included.

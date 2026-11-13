@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pinpoint · ICAN research assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<style>
+html, body{ height: 100%; }
+body{ display: flex; flex-direction: column; }
+.work{ flex: 1; min-height: 0; display: grid; grid-template-columns: 260px minmax(0, 1fr) 320px; grid-template-rows: minmax(0, 1fr); }
+.work.reading{ grid-template-columns: 260px minmax(0, 1fr) minmax(0, var(--read-w, 470px)); }
+
+/* left: the cases */
+.list{ border-right: 1px solid var(--line); background: var(--panel); overflow-y: auto; padding: 16px 12px 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.list .btn{ padding: 11px 16px; }
+.list .label{ margin: 4px 4px 0; }
+#cases{ display: flex; flex-direction: column; gap: 4px; }
+.row{ display: flex; align-items: center; border: 1px solid transparent; border-radius: 4px; }
+.row:hover{ background: var(--card); }
+.row.on{ border-color: var(--dark-blue); background: var(--card); }
+.row .open{ flex: 1; min-width: 0; text-align: left; border: 0; background: none; padding: 10px; font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row.on .open{ font-weight: 700; }
+.row .trash{ flex: none; width: 40px; height: 40px; border: 0; background: none; padding: 0; display: grid; place-items: center; color: var(--muted); border-radius: 4px; opacity: 0; }
+.row .trash svg{ pointer-events: none; }
+.row.on .trash, .row:hover .trash, .row .trash:focus-visible{ opacity: 1; }
+.row .trash:hover{ color: var(--red-dark); }
+
+/* right: the case */
+.case{ border-left: 1px solid var(--line); min-width: 0; background: var(--panel); overflow-y: auto; padding: 18px 16px 24px; display: grid; gap: 22px; align-content: start; }
+.case h2{ font-size: 1.2rem; margin-bottom: 4px; }
+.progress{ font-size: .86rem; color: var(--muted); margin: 0 0 12px; }
+.progress b{ color: var(--ink); }
+.facts{ display: grid; gap: 10px; }
+.fact{ display: grid; gap: 3px; }
+.outcome{ display: grid; gap: 3px; }
+.outcome-note{ display: block; width: 100%; flex: none; border: 1px solid var(--line); border-radius: 4px; background: var(--card); padding: 8px 9px; font-size: .93rem; margin-top: 6px; max-height: none; resize: vertical; }
+.outcome-note:focus-visible{ outline: 2px solid var(--accent, currentColor); outline-offset: 1px; }
+.fact select, .outcome select{ width: 100%; border: 1px solid var(--line); border-radius: 4px; background: var(--card); padding: 8px 9px; font-size: .93rem; }
+.fact select.empty, .outcome select.empty{ color: var(--muted); }
+.fact small{ font-size: .78rem; color: var(--muted); line-height: 1.35; }
+.fact.set small{ display: none; }
+.block-head{ display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.quiet{ margin: 0; font-size: .86rem; color: var(--muted); }
+.case-label{ width: 100%; border: 1px solid var(--line); border-radius: 4px; background: var(--card); padding: 8px 9px; font-size: .93rem; margin: 6px 0 4px; }
+.reading .case{ display: none; }      /* the source being read takes the place of This case */
+.need ul{ margin: 6px 0 0; padding-left: 18px; } .need li{ margin: 4px 0; }
+.sec-head{ padding: 12px 16px 4px; display: flex; flex-direction: column; gap: 2px; } .sec-head span, .line .lead{ color: var(--muted); font-size: .86rem; }
+.line .lead{ margin: 0; padding: 8px 16px 0 22px; } .line + .line{ border-top: 1px solid var(--line); }
+.need{ margin: 0; padding: 9px 12px; border: 1px solid var(--orange); border-radius: 4px; background: light-dark(#fdf3df, #3f3416); font-size: .9rem; }
+.grade{ display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .86rem; color: var(--muted); }
+.grade button{ border: 1px solid var(--line); background: var(--card); border-radius: 20px; padding: 5px 12px; color: var(--head); font-weight: 600; }
+.grade button:hover{ border-color: var(--cyan); }
+.grade button.on{ background: var(--dark-blue); color: #fff; border-color: var(--dark-blue); }
+#saved{ display: grid; gap: 8px; margin: 0 0 10px; padding: 0; list-style: none; }
+#saved li{ background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--orange); border-radius: 4px; padding: 8px 10px; font-size: .86rem; display: grid; gap: 2px; cursor: pointer; }
+#saved li div{ display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+#saved li b{ font: 500 .8rem/1.3 var(--mono); color: var(--head); }
+#saved li span{ color: var(--muted); }
+
+/* middle: ask and answer */
+.talk{ display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+#scroll{ flex: 1; overflow-y: auto; }
+#thread{ display: grid; gap: 16px; padding: 24px clamp(14px, 3vw, 30px) 28px; max-width: 780px; margin: 0 auto; }
+.empty h1{ font-size: clamp(1.7rem, 3.2vw, 2.3rem); color: var(--warm-red); margin: 8px 0 10px; }
+.empty > p{ color: var(--muted); margin: 0 0 22px; max-width: 34em; }
+.tries{ display: grid; gap: 8px; margin-top: 10px; }
+.tries button{ text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 11px 14px; color: var(--link); font-weight: 600; }
+.tries button:hover{ border-color: var(--cyan); }
+.turn{ display: grid; gap: 12px; animation: rise .35s ease both; }
+@keyframes rise{ from{ opacity: 0; transform: translateY(8px); } to{ opacity: 1; transform: none; } }
+.ask{ justify-self: end; max-width: 86%; background: var(--dark-blue); color: #fff; padding: 10px 14px; border-radius: 12px 12px 2px 12px; margin: 0; overflow-wrap: anywhere; }
+.ask mark{ font-family: var(--mono); font-size: .86em; }
+.took{ justify-self: end; margin: -8px 0 0; font-size: .86rem; color: var(--head); background: light-dark(#fdf3df, #3f3416); border: 1px solid var(--orange); border-radius: 4px; padding: 6px 10px; }
+.said{ margin: 0; color: var(--muted); font-size: .93rem; }
+.short{ border: 1px solid var(--line); border-left: 5px solid var(--dark-blue); border-radius: 4px; background: var(--card); padding: 12px 16px 10px 16px; }
+.short .label{ margin: 0 0 6px; }
+.short p{ margin: 0 0 10px; font: 400 1.14rem/1.5 var(--serif); color: var(--head); }
+.short p b{ font-weight: 700; background: var(--sand-light); box-shadow: 0 0 0 2px var(--sand-light); }
+.short .cite{ font-size: .78rem; }
+.src{ border: 1px solid var(--line); border-radius: 4px; background: var(--card); overflow: hidden; }
+.src.open{ border-color: var(--cyan); box-shadow: 0 0 0 2px var(--cyan-soft); }
+.src blockquote{ margin: 0; padding: 14px 16px 12px 18px; border-left: 4px solid var(--orange); font: 400 1.02rem/1.58 var(--serif); }
+.src-foot{ display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 9px 12px; border-top: 1px solid var(--line); background: var(--panel); }
+.cite{ border: 1px solid var(--line); background: var(--card); color: var(--head); border-radius: 4px; padding: 4px 9px; font: 500 .8rem/1.2 var(--mono); text-align: left; }
+.cite:hover{ border-color: var(--cyan); color: var(--link); }
+.cite::after{ content: " ›"; }
+.acts{ display: flex; gap: 14px; flex-wrap: wrap; }
+.none{ border: 1px solid var(--line); border-left: 4px solid var(--warm-red); border-radius: 4px; padding: 16px 18px; background: var(--card); }
+.none b{ display: block; font-size: 1.3rem; color: var(--head); margin-bottom: 6px; }
+.none p{ margin: 0; }
+.none p + p{ margin-top: 6px; color: var(--muted); font-size: .9rem; }
+.none .acts{ margin-top: 12px; }
+.second{ margin: 10px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); font-size: .93rem; }
+.second p{ margin: 4px 0; }
+.second .was{ color: var(--muted); font-size: .88rem; }
+.second .open{ margin: 4px 0 0; padding-left: 18px; display: grid; gap: 10px; }
+.second .check{ display: block; margin-top: 3px; }
+.short .es{ margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.srcs > summary{ cursor: pointer; font-weight: 600; color: var(--link); padding: 4px 2px; }
+.srcs[open] > summary{ margin-bottom: 8px; }
+.srcs .src + .src{ margin-top: 12px; }
+.chips{ display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button{ border: 1px solid var(--line); background: var(--card); border-radius: 20px; padding: 6px 13px; color: var(--head); font-weight: 600; }
+.chips button:hover{ border-color: var(--cyan); color: var(--link); }
+.wait{ border: 1px solid var(--line); border-left: 5px solid var(--dark-blue); border-radius: 4px; background: var(--card); padding: 16px 18px; display: grid; gap: 12px; }
+.stage{ display: flex; align-items: center; gap: 12px; margin: 0; font-size: 1.06rem; color: var(--muted); }
+.stage i{ flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-style: normal; font-size: .8rem; line-height: 1; }
+.stage.now{ font-weight: 700; color: var(--head); }
+.stage.now i{ border-width: 3px; border-top-color: var(--dark-blue); animation: turn .8s linear infinite; }
+.stage.done i{ border-color: var(--ok); color: var(--ok); }
+.stage.done i::before{ content: "✓"; }
+@keyframes turn{ to{ transform: rotate(360deg); } }
+.next{ display: grid; gap: 8px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 4px; }
+.next .chips button{ font-weight: 500; font-size: .9rem; }
+.compose{ border-top: 1px solid var(--line); padding: 12px clamp(14px, 3vw, 30px) 14px; flex: none; }
+.compose > div{ max-width: 780px; margin: 0 auto; }
+form{ display: flex; gap: 8px; align-items: flex-end; border: 1px solid var(--line); border-radius: 4px; background: var(--card); padding: 5px 5px 5px 14px; }
+form:focus-within{ border-color: var(--cyan); box-shadow: 0 0 0 2px var(--cyan-soft); }
+textarea{ flex: 1; border: 0; background: transparent; resize: none; outline: none; padding: 8px 0; max-height: 9em; line-height: 1.4; }
+textarea:focus-visible{ outline: none; }
+form .btn{ padding: 9px 14px; }
+.hint{ margin: 7px 2px 0; font-size: .8rem; color: var(--muted); }
+
+/* right, while a source is being read */
+.read{ display: none; border-left: 1px solid var(--line); background: var(--card); min-width: 0; min-height: 0; flex-direction: column; }
+.reading .read{ display: flex; position: relative; }
+.read-drag{ position: absolute; left: -4px; top: 0; bottom: 0; width: 9px; cursor: col-resize; z-index: 5; touch-action: none; }
+.read-drag:hover, .read-drag:focus-visible, .read-drag.on{ background: var(--line); outline: none; }
+.read-head{ padding: 14px 18px 12px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; flex: none; background: var(--panel); }
+.read-head div{ display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.read-head h2{ font-size: 1.15rem; }
+.read-head p{ margin: 0; font-size: .84rem; color: var(--muted); }
+#doc{ flex: 1; overflow-y: auto; padding: 18px 20px 60px; font: 400 .98rem/1.6 var(--serif); }
+#doc p{ margin: 0 0 .7em; padding: 3px 8px; border-radius: 4px; border-left: 4px solid transparent; }
+#doc p.here{ background: light-dark(#fdf3df, #3f3416); border-left-color: var(--orange); }
+
+/* narrow window: the two bars sit behind buttons, one shown at a time in place of the thread */
+.bars{ display: none; }
+@media (max-width: 1000px){
+  .bar{ padding: 8px 12px; }
+  .brand span{ display: none; }
+  .bars{ display: flex; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--panel); flex: none; }
+  .bars button{ flex: 1; min-width: 0; height: 44px; border: 1px solid var(--line); border-radius: 4px; background: var(--card); font-weight: 600; color: var(--head); }
+  .bars button[aria-expanded="true"]{ background: var(--dark-blue); border-color: var(--dark-blue); color: #fff; }
+  .work, .work.reading{ grid-template-columns: minmax(0, 1fr); }
+  .list, .case{ display: none; border: 0; }
+  .show-list .list{ display: flex; }
+  .show-case .case{ display: grid; }
+  .show-list .talk, .show-case .talk{ display: none; }
+  .row .trash{ opacity: 1; width: 44px; height: 44px; }
+  .compose{ padding: 10px 12px 12px; }
+  .reading .read{ position: fixed; inset: 0; z-index: 20; border: 0; }
+  .read-drag{ display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="stripes" aria-hidden="true"></div>
+<header class="bar">
+  <a class="brand" href="./"><b>Pinpoint</b><span>ICAN research assistant</span></a>
+  <nav class="nav">
+    <a href="./" class="on">Cases</a>
+    <a href="sources.html" id="src-link">Sources</a>
+  </nav>
+</header>
+
+<div class="bars" id="bars">
+  <button type="button" id="show-list" aria-expanded="false" aria-controls="list">All cases</button>
+  <button type="button" id="show-case" aria-expanded="false" aria-controls="case">This case</button>
+</div>
+
+<div class="work" id="work">
+
+  <aside class="list" id="list" aria-label="Cases">
+    <button class="btn" id="new-case" type="button">New case</button>
+    <p class="label">Cases</p>
+    <div id="cases"></div>
+  </aside>
+
+  <div class="talk">
+    <main id="scroll">
+      <div id="thread" aria-live="polite">
+        <div class="empty" id="empty">
+          <h1>What do you need to know?</h1>
+          <p>You get the rule in its own words. Click a citation to read it in the source. If the approved sources don&rsquo;t answer the question, I&rsquo;ll say so.</p>
+          <p class="label" id="tries-label">Try these</p>
+          <div class="tries" id="tries"></div>
+        </div>
+      </div>
+    </main>
+    <div class="compose">
+      <div>
+        <form id="form">
+          <label for="q" style="position:absolute;left:-9999px">Your question</label>
+          <textarea id="q" rows="1" placeholder="Ask about a rule" autocomplete="off"></textarea>
+          <button id="go" class="btn" type="submit">Ask</button>
+        </form>
+        <p class="hint">Ask about the rule, not the client. Names, dates and ID numbers are removed before your question is sent.</p>
+      </div>
+    </div>
+  </div>
+
+  <aside class="case" id="case" aria-label="This case">
+    <section>
+      <h2>This case</h2>
+      <label for="label" style="position:absolute;left:-9999px">Your reference for this case</label>
+      <input id="label" class="case-label" placeholder="Your reference for this case" autocomplete="off" maxlength="80">
+      <p class="quiet" style="margin-bottom:10px">Saved as you go. No names or ID numbers.</p>
+      <p class="progress" id="progress"></p>
+      <div class="facts" id="facts">
+        <label class="fact"><span class="label">Plan type</span>
+          <select id="f-plan" class="empty"><option value="">Not known yet</option><option>Managed long-term care</option><option>Mainstream managed care</option><option>PACE</option><option>Not sure</option></select>
+          <small>Rules and appeal steps differ by plan type. This is the first thing to pin down.</small></label>
+        <label class="fact"><span class="label">What happened</span>
+          <select id="f-what" class="empty"><option value="">Not known yet</option><option>Disenrolled from the plan</option><option>Service denied</option><option>Service reduced or stopped</option><option>Prior authorization denied</option><option>Cannot find a provider</option><option>Something else</option></select>
+          <small>Picks which rules and questions apply.</small></label>
+        <label class="fact"><span class="label">Service at issue</span>
+          <select id="f-service" class="empty"><option value="">Not known yet</option><option>Home care</option><option>Consumer directed personal assistance</option><option>Nursing home</option><option>Equipment or supplies</option><option>Prescriptions</option><option>Doctor or specialist visits</option><option>Other</option></select>
+          <small>Some services have rules of their own.</small></label>
+        <label class="fact"><span class="label">Notice received</span>
+          <select id="f-notice" class="empty"><option value="">Not known yet</option><option>Written notice</option><option>Told by phone only</option><option>No notice</option></select>
+          <small>Most rules turn on whether a written notice went out and what it said.</small></label>
+        <label class="fact"><span class="label">Services still in place</span>
+          <select id="f-still" class="empty"><option value="">Not known yet</option><option>Yes</option><option>No</option><option>Not sure</option></select>
+          <small>Decides whether benefits can continue during an appeal.</small></label>
+      </div>
+    </section>
+
+    <section>
+      <label class="outcome"><span class="label">Outcome</span>
+        <select id="outcome" class="empty"><option value="">Case is still open</option><option>Resolved: the client got what they asked for</option><option>Resolved in part</option><option>Not resolved</option><option>Referred to another organization</option><option>Lost contact with the client</option></select></label>
+      <label for="outcome-note" style="position:absolute;left:-9999px">What happened in the end</label>
+      <textarea id="outcome-note" class="outcome-note" rows="2" maxlength="500" placeholder="What happened in the end. No names or ID numbers."></textarea>
+      <p class="quiet" id="outcome-saved" hidden>Outcome saved.</p>
+    </section>
+
+    <section>
+      <div class="block-head"><p class="label">Saved to this case</p><button class="link" id="copy-case" type="button" hidden>Copy case notes</button></div>
+      <ul id="saved"></ul>
+      <p class="quiet" id="saved-empty">Rules you keep show up here and stay with the case.</p>
+    </section>
+  </aside>
+
+  <aside class="read" aria-label="Source">
+    <div class="read-drag" id="read-drag" role="separator" aria-orientation="vertical" aria-label="Drag to make the source wider or narrower" tabindex="0"></div>
+    <div class="read-head">
+      <div><h2 id="doc-title"></h2><button class="btn ghost" id="close-doc" type="button">Close</button></div>
+      <p id="doc-meta"></p>
+    </div>
+    <div id="doc" tabindex="0"></div>
+  </aside>
+</div>
+<div id="toast" role="status"></div>
+
+<script src="demo.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const thread = $('thread'), scroll = $('scroll'), form = $('form'), box = $('q'), go = $('go'), work = $('work');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const longDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'});
+const down = () => { scroll.scrollTop = scroll.scrollHeight; };
+const toast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 1600); };
+const copy = (text, msg) => navigator.clipboard.writeText(text).then(() => toast(msg), () => toast('Could not copy'));
+const post = (path, body) => fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)}).then(r => r.json());
+
+/* ---------- the case: what to collect, and why ---------- */
+const FACTS = {plan: 'Plan type', what: 'What happened', service: 'Service at issue', notice: 'Notice received', still: 'Services still in place'};
+const saved = [];
+const plan = () => $('f-plan').value || null;
+const facts = () => Object.fromEntries(Object.keys(FACTS).map(k => [k, $('f-' + k).value || null]));
+
+/* ---------- the case is kept on the server: label, facts, questions, kept rules, grades ---------- */
+let caseId = null, saveTimer;
+const TRASH = '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.5 7v4M9.5 7v4"/></svg>';
+async function listCases(){
+  const rows = await (await fetch('/api/cases')).json();
+  $('cases').innerHTML = rows.map(c => `<div class="row${c.id === caseId ? ' on' : ''}">` +
+    `<button class="open" type="button" data-id="${c.id}"${c.id === caseId ? ' aria-current="true"' : ''}>${esc(c.label)}</button>` +
+    `<button class="trash" type="button" data-id="${c.id}" data-label="${esc(c.label)}" aria-label="Delete case" title="Delete case">${TRASH}</button></div>`).join('');
+}
+async function ensureCase(){
+  if (!caseId){
+    caseId = (await post('/api/case', {label: $('label').value, facts: facts()})).id;
+    history.replaceState(null, '', '?c=' + caseId);
+    listCases();
+  }
+  return caseId;
+}
+function touchCase(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => { await post('/api/case', {id: await ensureCase(), label: $('label').value, facts: facts()}); listCases(); }, 400);
+}
+$('cases').onclick = async e => {
+  const del = e.target.closest('.trash');
+  if (del){
+    const id = +del.dataset.id;
+    if (!confirm(`Delete "${del.dataset.label}"?`)) return;
+    if (id === caseId) clearTimeout(saveTimer);
+    await post('/api/case/delete', {id});
+    if (id === caseId) location.assign(location.pathname); else listCases();
+    return;
+  }
+  const b = e.target.closest('.open'); if (b && +b.dataset.id !== caseId) location.assign('?c=' + b.dataset.id);
+};
+$('label').oninput = touchCase;
+let outcomeTimer;
+function touchOutcome(){                    // how the case ended; saved on its own, a moment after the last change
+  $('outcome').classList.toggle('empty', !$('outcome').value);
+  $('outcome-saved').hidden = true;
+  clearTimeout(outcomeTimer);
+  outcomeTimer = setTimeout(async () => {
+    await post('/api/case/outcome', {id: await ensureCase(), outcome: $('outcome').value, note: $('outcome-note').value});
+    $('outcome-saved').hidden = false; listCases();
+  }, 600);
+}
+$('outcome').onchange = touchOutcome;
+$('outcome-note').oninput = touchOutcome;
+function showBar(which){                    // narrow window: one bar at a time, or neither
+  const on = which && !document.body.classList.contains('show-' + which) ? which : null;
+  for (const k of ['list', 'case']){ document.body.classList.toggle('show-' + k, k === on); $('show-' + k).setAttribute('aria-expanded', k === on); }
+}
+$('show-list').onclick = () => showBar('list');
+$('show-case').onclick = () => showBar('case');
+const QUESTIONS = {
+  '': ['Can a plan disenroll someone because she needs more care?', 'What are the reasons that a Medicaid plan may disenroll a member?', 'Can services continue during an appeal?'],
+  'Disenrolled from the plan': ['What are the reasons that a Medicaid plan may disenroll a member?', 'What process is supposed to be followed for these disenrollments?', 'Which entity was responsible for not following the correct process?', 'What appeal or complaint procedure is appropriate to rectify the error?'],
+  'Service denied': ['What must a notice of adverse benefit determination include?', 'How long does an enrollee have to file an appeal?', 'What appeal or complaint procedure is appropriate to rectify the error?'],
+  'Service reduced or stopped': ['Can services continue during an appeal?', 'What must a notice of adverse benefit determination include?', 'How long does an enrollee have to file an appeal?'],
+  'Prior authorization denied': ['What must a notice of adverse benefit determination include?', 'How long does an enrollee have to file an appeal?', 'Can an enrollee request an expedited appeal?'],
+  'Cannot find a provider': ['What must a plan do when it cannot provide a service in network?', 'What are the network adequacy standards?'],
+  'Something else': ['What are the enrollee rights under managed care?', 'What appeal or complaint procedure is appropriate to rectify the error?'],
+};
+function drawFacts(){
+  let n = 0;
+  for (const k of Object.keys(FACTS)){
+    const f = $('f-' + k), set = !!f.value;
+    f.classList.toggle('empty', !set); f.closest('.fact').classList.toggle('set', set); if (set) n++;
+  }
+  const missing = Object.entries(FACTS).filter(([k]) => !$('f-' + k).value).map(([, v]) => v.toLowerCase());
+  $('progress').innerHTML = n === 5 ? '<b>All 5 collected.</b>' : `<b>${n} of 5 collected.</b>`;
+  const qs = QUESTIONS[$('f-what').value] || QUESTIONS[''];
+  if (!$('tries')) return;                 // the starting suggestions are gone once a question has been asked
+  $('tries-label').textContent = $('f-what').value ? 'Suggested for this case' : 'Try these';
+  $('tries').innerHTML = qs.map(q => `<button type="button">${esc(q)}</button>`).join('');
+  $('tries').querySelectorAll('button').forEach(b => b.onclick = () => send(b.textContent));
+}
+document.querySelectorAll('.fact select').forEach(s => s.onchange = () => { drawFacts(); touchCase(); });
+function setFact(k, v){ $('f-' + k).value = v; drawFacts(); }
+
+function drawSaved(){
+  $('saved').innerHTML = saved.map((p, i) =>
+    `<li><div><b>${esc(p.cite)}</b><button class="link" data-drop="${i}" type="button">Remove</button></div><span>${esc(p.heading)}</span></li>`).join('');
+  $('saved-empty').hidden = saved.length > 0; $('copy-case').hidden = saved.length === 0;
+  document.querySelectorAll('[data-save]').forEach(b => { b.textContent = saved.some(p => p.id == b.dataset.save) ? 'Saved ✓' : 'Save to case'; });
+}
+$('saved').onclick = e => {
+  const d = e.target.dataset.drop;
+  if (d != null){ const [gone] = saved.splice(+d, 1); drawSaved(); if (caseId) post('/api/save', {case_id: caseId, passage_id: gone.id, on: false}); return; }
+  const li = e.target.closest('li'); if (li) openSource(saved[[...$('saved').children].indexOf(li)]);
+};
+const quote = p => `"${p.text}"\n— ${p.cite}, ${p.heading}\n${p.url}`;
+$('copy-case').onclick = () => {
+  const facts = Object.entries(FACTS).map(([k, name]) => `${name}: ${$('f-' + k).value || 'not known'}`).join('\n');
+  copy(`CASE NOTES\n${facts}\n\nRULES FOUND\n\n` + saved.map((p, i) => `${i + 1}. ${quote(p)}`).join('\n\n'), 'Case notes copied');
+};
+$('new-case').onclick = () => location.assign(location.pathname);
+
+/* ---------- sources ---------- */
+fetch('/api/sources').then(r => r.json()).then(s => { $('src-link').textContent = `Sources (${s.sources.length})`; });
+
+async function openSource(p){
+  const s = await (await fetch('/api/section?id=' + p.id)).json();
+  $('doc-title').textContent = `§ ${s.section} ${s.heading}`;
+  $('doc-meta').innerHTML = `${esc(s.source)} · checked ${longDate(s.checked)} · <a href="${esc(p.url)}" target="_blank" rel="noopener">Open the source &#8599;</a>`;
+  $('doc').innerHTML = s.paragraphs.map(x =>
+    `<p id="para-${x.id}" class="${x.id === s.target ? 'here' : ''}" style="margin-left:${(x.level - 1) * 18}px">${esc(x.text)}</p>`).join('');
+  work.classList.add('reading');
+  document.querySelectorAll('.src.open').forEach(c => c.classList.remove('open'));
+  document.querySelectorAll(`.src[data-id="${p.id}"], .line[data-id="${p.id}"]`).forEach(c => c.closest('.src').classList.add('open'));
+  $('para-' + s.target).scrollIntoView({block: 'center'});
+}
+{                                           // the source panel's left edge drags; arrow keys move it too
+  const drag = $('read-drag');
+  const setW = w => work.style.setProperty('--read-w', Math.round(Math.max(320, Math.min(w, innerWidth - 260 - 340))) + 'px');
+  const now = () => drag.parentElement.getBoundingClientRect().width;
+  drag.onpointerdown = e => { drag.setPointerCapture(e.pointerId); drag.classList.add('on'); e.preventDefault(); };
+  drag.onpointermove = e => { if (drag.classList.contains('on')) setW(innerWidth - e.clientX); };
+  drag.onpointerup = drag.onpointercancel = () => drag.classList.remove('on');
+  drag.onkeydown = e => { if (e.key === 'ArrowLeft') setW(now() + 40); else if (e.key === 'ArrowRight') setW(now() - 40); };
+}
+$('close-doc').onclick = () => { work.classList.remove('reading'); document.querySelectorAll('.src.open').forEach(c => c.classList.remove('open')); };
+
+/* ---------- flags: what goes to the keeper of the sources ---------- */
+function flagButton(kind, question, p){
+  const b = el('button', 'link', kind === 'gap' ? 'Flag this gap' : 'Wrong or out of date');
+  b.type = 'button';
+  b.onclick = async () => {
+    const note = prompt(kind === 'gap' ? 'What were you looking for? (optional, no client details)' : 'What is wrong? (optional, no client details)');
+    if (note === null) return;
+    await post('/api/flag', {kind, question, plan: plan(), cite: p?.cite, url: p?.url, note});
+    b.textContent = 'Sent to whoever maintains the sources ✓'; b.disabled = true;
+  };
+  return b;
+}
+
+/* ---------- grade: good, bad, or a source is missing ---------- */
+function gradeRow(r){
+  const row = el('div', 'grade'); row.append(el('span', '', 'Was this right?'));
+  const paint = () => row.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.g === r.grade); b.setAttribute('aria-pressed', b.dataset.g === r.grade); });
+  for (const [g, name] of Object.entries({good: 'Good', bad: 'Bad', missing: 'A source is missing'})){
+    const b = el('button', '', name); b.type = 'button'; b.dataset.g = g;
+    b.onclick = async () => {
+      let note = null;
+      if (g !== 'good' && r.grade !== g){
+        note = prompt(g === 'bad' ? 'What was wrong? (optional, no client details)' : 'What source is missing? (optional, no client details)');
+        if (note === null) return;
+      }
+      r.grade = r.grade === g ? null : g;
+      await post('/api/grade', {ask_id: r.ask_id, grade: r.grade, note});
+      paint(); if (r.grade) toast('Grade saved');
+    };
+    row.append(b);
+  }
+  paint(); return row;
+}
+
+/* ---------- what to find out from the client, for each case fact not yet set ---------- */
+const ASK_CLIENT = {
+  plan: 'Which kind of plan is the client in?',
+  what: 'What did the plan do? Was the client dropped from the plan, was a service denied, was a service cut or stopped, or can they not find a provider?',
+  service: 'Which service is this about? For example home care, a nursing home, equipment, prescriptions.',
+  notice: 'Did the plan send anything in writing? Ask the client to find the letter and read you its title and date. If they were only told by phone, note that.',
+  still: 'Is the client still getting the service today?',
+};
+function needBox(r, turn){
+  if (!r.need?.length) return;
+  const box = el('div', 'need', '<b>Ask the client</b><ul>' + r.need.map(k => `<li>${ASK_CLIENT[k]} <button class="link" type="button" data-k="${k}">Set ${FACTS[k].toLowerCase()}</button></li>`).join('') + '</ul>');
+  box.querySelectorAll('button').forEach(b => b.onclick = () => { $('close-doc').click(); if (!$('case').offsetParent) showBar('case'); $('f-' + b.dataset.k).focus(); });
+  turn.append(box);
+}
+
+/* ---------- the summary, then one card per section with the lines it names ---------- */
+function lineActs(p, question){
+  const acts = el('span', 'acts');
+  const save = el('button', 'link', 'Save to case'); save.type = 'button'; save.dataset.save = p.id;
+  save.onclick = () => { const i = saved.findIndex(x => x.id === p.id); if (i < 0) saved.push(p); else saved.splice(i, 1); drawSaved();
+    ensureCase().then(id => post('/api/save', {case_id: id, passage_id: p.id, on: i < 0})); };
+  const cp = el('button', 'link', 'Copy'); cp.type = 'button'; cp.onclick = () => copy(quote(p), 'Copied with citation');
+  acts.append(save, cp, flagButton('wrong', question, p));
+  return acts;
+}
+const SECOND_READ = false;      // off for the showcase: the answer is two hosted model calls and the code checks
+/* ---------- the second read: each sentence against the lines it cites, and what the lines leave open ---------- */
+function secondRead(r, s, lines){
+  const box = el('div', 'second');
+  const draw = () => {
+    const read = r.second.read, n = read.length;
+    const fixed = read.filter(x => x.verdict === 'overstated' && x.now), cut = read.filter(x => x.verdict === 'unsupported');
+    const flagged = read.filter(x => x.verdict === 'overstated' && !x.now);
+    let html = `<p class="label">Second read</p><p>${n - fixed.length - cut.length - flagged.length} of ${n} sentence${n === 1 ? '' : 's'} supported by the lines cited.` +
+      (fixed.length ? ` ${fixed.length} reworded to say only what its line says.` : '') +
+      (cut.length ? ` ${cut.length} removed: the line cited does not say it.` : '') +
+      (flagged.length ? ` ${flagged.length} may say more than its line does. Read the source.` : '') + '</p>';
+    for (const x of fixed) html += `<p class="was">Before: ${esc(x.was)}</p>`;
+    for (const x of cut) html += `<p class="was">Removed: ${esc(x.was)}</p>`;
+    box.innerHTML = html;
+    if (r.second.open.length){
+      box.append(el('p', 'label', 'What the sources leave open'));
+      const ul = el('ul', 'open');
+      for (const o of r.second.open){
+        const li = el('li', '', `${esc(o.point)} `);
+        for (const c of o.cites){
+          const b = el('button', 'cite', esc(c.cite)); b.type = 'button'; b.title = 'Read this in the source'; b.onclick = () => openSource(c); li.append(b, ' ');
+        }
+        li.append(el('span', 'check', '<b>To check:</b> ' + esc(o.check)));
+        ul.append(li);
+      }
+      box.append(ul);
+    }
+  };
+  const run = async () => {
+    box.innerHTML = '<p class="label">Second read</p><p class="quiet">Checking each sentence against the lines it cites…</p>';
+    let t = {}; try { t = await post('/api/second', {ask_id: r.ask_id}); } catch (e) {}
+    if (!t.second){ box.innerHTML = ''; const b = el('button', 'link', 'Run the second read'); b.type = 'button'; b.onclick = run; box.append(b); return; }
+    r.summary = t.summary; r.second = t.second;
+    s.querySelectorAll('p.sent').forEach(p => p.remove());
+    s.querySelector('.label').after(...sentences(r, lines));
+    draw(); down();
+  };
+  if (r.second) draw();
+  else if (r.fresh && r.ask_id) run();
+  else if (r.ask_id){ const b = el('button', 'link', 'Run the second read'); b.type = 'button'; b.onclick = run; box.append(b); }
+  return box;
+}
+function sentences(r, lines){
+  return r.summary.map(x => {
+    const p = el('p', 'sent', esc(x.text) + ' ');
+    for (const c of x.cites){
+      const b = el('button', 'cite', esc(c.cite)); b.type = 'button'; b.title = 'Read this in the source';
+      b.onclick = () => openSource(lines.find(l => l.id === c.id)); p.append(b, ' ');
+    }
+    return p;
+  });
+}
+function summary(r, turn, question){
+  const lines = r.cards.flatMap(c => c.lines);
+  const s = el('div', 'short', '<p class="label">Summary</p>');
+  s.append(...sentences(r, lines));
+  const es = el('button', 'link', 'Show in Spanish'); es.type = 'button';
+  es.onclick = async () => {
+    es.disabled = true; es.textContent = 'Translating…';
+    const t = await post('/api/spanish', {sentences: r.summary.map(x => x.text)});
+    if (!t.sentences){ es.disabled = false; es.textContent = 'Show in Spanish'; return toast(t.error || 'The translation could not be written.'); }
+    const box = el('div', 'es', '<p class="label">Resumen en español (traducción automática)</p>'); box.lang = 'es';
+    t.sentences.forEach((text, i) => {
+      const p = el('p', '', esc(text) + ' ');
+      for (const c of r.summary[i].cites){
+        const b = el('button', 'cite', esc(c.cite)); b.type = 'button'; b.lang = 'en'; b.title = 'Read this in the source';
+        b.onclick = () => openSource(lines.find(l => l.id === c.id)); p.append(b, ' ');
+      }
+      box.append(p);
+    });
+    es.replaceWith(box);
+  };
+  s.append(es);
+  turn.append(s);
+  if (SECOND_READ) turn.append(secondRead(r, s, lines));
+  const n = lines.length;
+  const box = el('details', 'srcs', `<summary>Sources (${n})</summary>`);     // closed until the advocate opens it
+  turn.append(box);
+  for (const c of r.cards){
+    const card = el('div', 'src sec', `<div class="sec-head"><b>${esc(c.title)}</b><span>${esc(c.source)}</span></div>`);
+    for (const l of c.lines){
+      const row = el('div', 'line'); row.dataset.id = l.id;
+      row.innerHTML = (l.lead ? `<p class="lead">${esc(l.lead)}</p>` : '') + `<blockquote>${esc(l.text)}</blockquote><div class="src-foot">` +
+        `<button class="cite" type="button" title="Read this in the source">${esc(l.cite)}</button></div>`;
+      row.querySelector('.cite').onclick = () => openSource(l);
+      row.querySelector('.src-foot').append(lineActs(l, question));
+      card.append(row);
+    }
+    box.append(card);
+  }
+  drawSaved();
+  if (r.ask_id) turn.append(gradeRow(r));
+}
+
+/* ---------- ask and answer ---------- */
+function render(r, turn, question){
+  if (r.kind === 'answer'){
+    needBox(r, turn);
+    if (r.summary) return summary(r, turn, question);
+    if (r.short){
+      const s = el('div', 'short');
+      s.innerHTML = `<p class="label">Summary</p><p>${r.short.html}</p>` +
+        `<button class="cite" type="button" title="Read this in the source">${esc(r.short.cite)}</button>`;
+      s.querySelector('.cite').onclick = () => openSource(r.passages.find(p => p.id === r.short.id) || r.short);
+      turn.append(s);
+    } else {
+      turn.append(el('p', 'said', 'No one sentence answers this. Here is what the approved sources say.'));
+    }
+    for (const p of r.passages){
+      const card = el('div', 'src'); card.dataset.id = p.id;
+      card.innerHTML = `<blockquote>${p.html}</blockquote><div class="src-foot">` +
+        `<button class="cite" type="button" title="Read this in the source">${esc(p.cite)}</button><span class="acts"></span></div>`;
+      card.querySelector('.cite').onclick = () => openSource(p);
+      const acts = card.querySelector('.acts');
+      const save = el('button', 'link', 'Save to case'); save.type = 'button'; save.dataset.save = p.id;
+      save.onclick = () => { const i = saved.findIndex(x => x.id === p.id); if (i < 0) saved.push(p); else saved.splice(i, 1); drawSaved();
+        ensureCase().then(id => post('/api/save', {case_id: id, passage_id: p.id, on: i < 0})); };
+      const cp = el('button', 'link', 'Copy'); cp.type = 'button'; cp.onclick = () => copy(quote(p), 'Copied with citation');
+      acts.append(save, cp, flagButton('wrong', question, p));
+      turn.append(card);
+    }
+    const next = [];
+    if (r.follow?.length){
+      next.push(el('p', 'label', 'Read more'));
+      const chips = el('div', 'chips');
+      for (const f of r.follow){ const b = el('button', '', esc(f.label)); b.type = 'button'; b.title = f.cite; b.onclick = () => openSource(f); chips.append(b); }
+      next.push(chips);
+    }
+    const more = (QUESTIONS[$('f-what').value] || QUESTIONS['']).filter(q => !asked.has(q)).slice(0, 3);
+    if (more.length){
+      next.push(el('p', 'label', 'Ask next'));
+      const chips = el('div', 'chips');
+      for (const q of more){ const b = el('button', '', esc(q)); b.type = 'button'; b.onclick = () => send(q); chips.append(b); }
+      next.push(chips);
+    }
+    if (next.length){ const box = el('div', 'next'); next.forEach(x => box.append(x)); turn.append(box); }
+    drawSaved();
+  } else if (r.kind === 'none'){
+    const d = el('div', 'none', `<b>No answer in the approved sources.</b><p>${esc(r.why)}</p><p>I searched ${r.searched.sections} sections in ${r.searched.sources.length} approved sources.</p>`);
+    if (!r.ask_id){ const acts = el('span', 'acts'); acts.append(flagButton('gap', question)); d.append(acts); }
+    turn.append(d);
+  } else if (r.kind === 'intake'){
+    needBox(r, turn);
+    if (!r.need?.length) turn.append(el('p', 'said', 'All five case facts are set.'));
+  } else if (r.kind === 'recorded'){          // only in the recorded demo (web/demo.js): a question that was not recorded
+    const d = el('div', 'none', '<b>This is a recorded demo.</b><p>No model runs here, so only the questions that were recorded can be shown.</p>');
+    const chips = el('div', 'chips');
+    for (const q of r.can.filter(q => !asked.has(q))){ const b = el('button', '', esc(q)); b.type = 'button'; b.onclick = () => send(q); chips.append(b); }
+    d.append(chips); turn.append(d);
+  } else if (r.kind === 'advice'){
+    turn.append(el('div', 'none', `<b>I don’t give advice on a case.</b><p>Ask me what the rule says and I’ll find it. What to do for your client is your call.</p>`));
+  } else {
+    turn.append(el('div', 'none', `<b>Something broke.</b><p>${esc(r.error || 'No reply from the server.')}</p>`));
+  }
+  if (r.ask_id && (r.kind === 'answer' || r.kind === 'none')) turn.append(gradeRow(r));
+}
+
+const asked = new Set();
+async function send(question, turn){
+  go.disabled = true; $('empty')?.remove(); asked.add(question);
+  let bubble = null;
+  if (!turn){ turn = el('div', 'turn'); bubble = el('p', 'ask', esc(question)); turn.append(bubble); thread.append(turn); }
+  const wait = el('div', 'wait', '<p class="stage now"><i aria-hidden="true"></i><span>Searching the approved sources…</span></p>' +
+    '<p class="stage"><i aria-hidden="true"></i><span>Reading the passages</span></p>');
+  wait.setAttribute('role', 'status'); turn.append(wait); down();
+  let r;
+  try { r = await post('/api/ask', {question, plan: plan(), facts: facts(), case_id: await ensureCase()}); }
+  catch (e) { r = {error: 'Could not reach Pinpoint. Is the server running?'}; }
+  if (r.writing){
+    const [a, b] = wait.children;
+    a.className = 'stage done'; a.lastChild.textContent = 'Searching the approved sources';
+    b.className = 'stage now'; b.lastChild.textContent = 'Reading the passages…'; down();
+    try { Object.assign(r, await post('/api/answer', {ask_id: r.ask_id, question: r.sent, pool: r.pool, facts: facts(), strangers: r.strangers})); } catch (e) {}
+  }
+  r.fresh = true;                           // just asked: the second read starts by itself
+  wait.remove();
+  if (bubble && r.removed && r.removed.length){
+    bubble.innerHTML = esc(r.sent).replace(/\[(name|date|phone|email|id number|address)\]/g, '<mark>[$1]</mark>');
+    bubble.after(el('p', 'took', `<b>${r.removed.length} personal detail${r.removed.length > 1 ? 's' : ''} removed before sending.</b> Please leave names, dates, addresses and ID numbers out of questions.`));
+  }
+  render(r, turn, question);
+  listCases();                              // the open case moves to the top of the list
+  go.disabled = false; down(); box.focus();
+}
+
+form.onsubmit = e => { e.preventDefault(); const q = box.value.trim(); if (!q || go.disabled) return; box.value = ''; box.style.height = ''; send(q); };
+box.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); form.requestSubmit(); } };
+box.oninput = () => { box.style.height = ''; box.style.height = box.scrollHeight + 'px'; };
+
+/* links for demos and screenshots: /?q=question  &case=judy fills the case  &open=1 opens the first source  &save=1 saves it */
+const args = new URLSearchParams(location.search);
+if (args.get('case') === 'judy'){ setFact('plan', 'Managed long-term care'); setFact('what', 'Disenrolled from the plan'); setFact('service', 'Home care'); setFact('notice', 'No notice'); setFact('still', 'Yes'); }
+drawFacts();
+listCases();
+async function reopen(id){
+  const c = await (await fetch('/api/case?id=' + id)).json();
+  if (c.error) return;
+  caseId = c.id; $('label').value = c.label || '';
+  for (const k of Object.keys(FACTS)) $('f-' + k).value = c.facts[k] || '';
+  $('outcome').value = c.outcome || ''; $('outcome').classList.toggle('empty', !c.outcome); $('outcome-note').value = c.outcome_note || '';
+  saved.push(...c.saved); drawFacts(); drawSaved();
+  if (c.asks.length) $('empty')?.remove();
+  for (const r of c.asks){
+    const turn = el('div', 'turn');
+    turn.append(el('p', 'ask', esc(r.sent).replace(/\[(name|date|phone|email|id number|address)\]/g, '<mark>[$1]</mark>')));
+    thread.append(turn); asked.add(r.sent); render(r, turn, r.sent);
+  }
+  listCases(); down();
+}
+if (args.get('c')) reopen(args.get('c'));
+if (args.get('q')) send(args.get('q')).then(() => {
+  if (args.get('save')) document.querySelector('[data-save]')?.click();
+  if (args.get('open')) document.querySelector('.cite')?.click();
+});
+else box.focus();
+</script>
+</body>
+</html>
