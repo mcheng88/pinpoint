@@ -2,7 +2,19 @@
 
 A case research tool for helpline advocates who work on Medicaid managed care cases. An advocate asks about a rule; Pinpoint shows the rule in the source's own words with its citation, and a short written summary on top. It does not give advice on a case.
 
-Built for the Columbia health equity sprint, November 2026.
+Built for the [AI for Health Equity Design Sprint](https://datascience.columbia.edu/events/ai-health-equity-design-sprint) at Columbia University, November 2026.
+
+## The sprint
+
+The sprint asked: "Can Artificial Intelligence tools be leveraged to increase health access and equity?"
+
+- **Host:** the Data Science Institute at Columbia University, as part of Frontiers in Data Science and AI, in the series Reprogramming Governance: Ethical AI in Science and Health.
+- **Community partner:** the [Community Service Society of New York](https://www.cssny.org/) (CSSNY), which presented two challenges on healthcare access and equity. Pinpoint answers one of them: research support for helpline advocates.
+- **Kickoff:** Friday, November 6, 2026, 11:00 AM to 4:30 PM. Teams then worked on their own for one week.
+- **Project showcase:** Friday, November 13, 2026, 2:00 PM to 5:00 PM, where teams present their approach, findings and proposed solutions to participants, partners and invited guests.
+- **Place:** Columbia Engineering Innovation Hub, Tang Family Hall, Manhattanville Campus, 2276 12th Ave, New York, NY 10027.
+
+The sprint brings together students, clinicians, technologists and community organizations. Teams work with synthetic datasets modeled on the partner's challenges; every case detail used with Pinpoint is made up. Projects are judged on technical innovation, ethical rigor and community engagement, and each community partner selects one project for an award.
 
 ## What it does
 
@@ -36,7 +48,7 @@ PINPOINT_LLM=openai:<model id>                 # any service that speaks OpenAI'
 - `app/`: the server, search, redaction, summary writing, case record and the two screens.
 - `data/ecfr/`: two federal regulations (42 CFR Part 438 and Part 431 Subpart E) as published on ecfr.gov, to build a first database from. More sources are added on the Sources screen.
 
-The question sets used to test the tool, and the list of sources the helpline supplied, belong to the organisation the tool was built for and are not included.
+The question sets used to test the tool, and the list of sources the helpline supplied, belong to CSSNY and are not included.
 
 ## Limits
 
