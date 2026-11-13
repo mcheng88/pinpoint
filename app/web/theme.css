@@ -1,0 +1,64 @@
+/* Colours and type follow cssny.org (its :root palette and Fann Grotesque Pro).
+   Fann Grotesque is a paid font; Hanken Grotesk stands in when it is not installed. */
+:root{
+  color-scheme: light;   /* cssny.org is white only; the app follows it in both modes */
+  --dark-blue: #262262; --navy: #16134f; --blue-soft: #726f99;
+  --warm-red: #df6334; --red-dark: #9d4b2d; --red-soft: #ea997b;
+  --orange: #e9a533; --orange-soft: #f0c47a; --orange-dark: #a3762c;
+  --cyan: #0080a0; --cyan-dark: #006078; --cyan-soft: #99ccd9;
+  --sand: #ddd5b8; --sand-light: #e9e4d1; --sand-dark: #9c9583;
+
+  --bg:     light-dark(#ffffff, #12103a);
+  --panel:  light-dark(#f4f1e6, #1a1748);
+  --card:   light-dark(#ffffff, #221f55);
+  --ink:    light-dark(#16134f, #ece8da);
+  --head:   light-dark(#262262, #f0c47a);
+  --muted:  light-dark(#5e5b7a, #a7a4c4);
+  --line:   light-dark(#ddd5b8, #3a3770);
+  --link:   light-dark(#0080a0, #99ccd9);
+  --accent: light-dark(#df6334, #ea997b);
+  --mark:   light-dark(#f0c47a, #e9a533);
+  --mark-ink: #16134f;
+  --ok:     light-dark(#2f8d46, #7fd4a0);
+  --font: "Fann Grotesque Pro", "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+*,*::before,*::after{ box-sizing: border-box; }
+body{ margin: 0; background: var(--bg); color: var(--ink); font: 400 1rem/1.5 var(--font); }
+button, textarea, input, select{ font: inherit; color: inherit; }
+button{ cursor: pointer; }
+a{ color: var(--link); text-decoration: none; }
+a:hover{ text-decoration: underline; }
+:focus-visible{ outline: 3px solid var(--cyan); outline-offset: 2px; border-radius: 4px; }
+mark{ background: var(--mark); color: var(--mark-ink); padding: .04em .1em; border-radius: 2px; }
+h1, h2, h3{ color: var(--head); font-weight: 700; line-height: 1.15; margin: 0; }
+.label{ font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+
+/* the diagonal stripe band from cssny.org */
+.stripes{ height: 10px; background: repeating-linear-gradient(-55deg, var(--orange) 0 14px, var(--warm-red) 14px 28px, var(--dark-blue) 28px 42px, var(--bg) 42px 54px); }
+
+/* top bar like the site's nav: uppercase, dark blue, red button */
+.bar{ display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 18px; background: var(--bg); border-bottom: 1px solid var(--line); flex: none; }
+.brand{ display: flex; align-items: baseline; gap: 10px; text-decoration: none; }
+.brand b{ font-size: 1.35rem; font-weight: 800; color: var(--warm-red); letter-spacing: -.01em; }
+.brand span{ font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--head); }
+.nav{ display: flex; gap: 8px; align-items: center; }
+.nav a, .nav button.plain{ font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--head); padding: 6px 10px; background: none; border: 0; border-radius: 4px; }
+.nav a.on{ background: var(--panel); }
+.btn{ display: inline-block; border: 0; border-radius: 4px; padding: 9px 16px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; font-size: .82rem; background: var(--warm-red); color: #fff; }
+.btn:hover{ background: var(--red-dark); text-decoration: none; }
+.btn.blue{ background: var(--dark-blue); }
+.btn.blue:hover{ background: var(--navy); }
+.btn.ghost{ background: transparent; color: var(--head); border: 2px solid var(--line); }
+.btn.ghost:hover{ border-color: var(--head); background: transparent; }
+.btn[disabled]{ opacity: .45; cursor: default; }
+.link{ border: 0; background: none; padding: 0; color: var(--link); font-size: .86rem; font-weight: 600; }
+.link:hover{ text-decoration: underline; }
+#toast{ position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); background: var(--dark-blue); color: #fff; padding: 8px 16px; border-radius: 4px; font-size: .88rem; opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 30; }
+#toast.on{ opacity: 1; }
+.tag{ display: inline-block; font-size: .7rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; background: var(--panel); color: var(--muted); }
+.tag.ok{ background: light-dark(#e3f1e6, #1f3d2a); color: var(--ok); }
+.tag.warn{ background: light-dark(#fbe9d2, #4a3714); color: light-dark(#a3762c, #f0c47a); }
+.tag.hot{ background: light-dark(#f9e2d8, #4a2a1e); color: var(--accent); }
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{ animation: none !important; transition: none !important; } }

@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sources · Pinpoint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/theme.css">
+<style>
+html, body{ height: 100%; }
+body{ display: flex; flex-direction: column; }
+.work{ flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px; grid-template-rows: minmax(0, 1fr); }
+.main{ overflow-y: auto; min-width: 0; padding: 24px clamp(14px, 3vw, 30px) 60px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 30px; align-content: start; }
+.side{ overflow-y: auto; min-width: 0; background: var(--panel); border-left: 1px solid var(--line); padding: 18px 16px 40px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; align-content: start; }
+.top h1{ font-size: clamp(1.6rem, 3vw, 2rem); color: var(--warm-red); margin-bottom: 6px; }
+.top p{ margin: 0; color: var(--muted); max-width: 48em; }
+h2{ font-size: 1.2rem; margin-bottom: 12px; }
+.head{ display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.head h2{ margin: 0; }
+table{ width: 100%; border-collapse: collapse; font-size: .92rem; }
+th{ text-align: left; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 6px 8px; border-bottom: 2px solid var(--line); }
+td{ padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.acts{ white-space: nowrap; text-align: right; }
+td.acts .link{ margin-left: 10px; }
+.muted{ color: var(--muted); font-size: .85rem; }
+.queue{ display: grid; gap: 10px; }
+.item{ background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--orange); border-radius: 4px; padding: 10px 12px; display: grid; gap: 4px; font-size: .92rem; }
+.item.gap{ border-left-color: var(--warm-red); }
+.item.done{ border-left-color: var(--ok); opacity: .75; }
+.item b{ color: var(--head); }
+.item .row{ display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.item .q{ font-style: italic; }
+.add{ display: grid; gap: 8px; }
+.add input{ width: 100%; border: 1px solid var(--line); border-radius: 4px; background: var(--card); padding: 9px 10px; }
+.add .row{ display: flex; gap: 8px; }
+.add .row input{ flex: 1; }
+.cat{ display: grid; gap: 6px; }
+.area{ border: 1px solid var(--line); border-radius: 4px; background: var(--card); }
+.area summary{ cursor: pointer; padding: 10px 14px; font-weight: 700; color: var(--head); display: flex; justify-content: space-between; gap: 10px; }
+.area summary span{ font-weight: 500; color: var(--muted); font-size: .85rem; }
+.area ul{ margin: 0; padding: 4px 14px 12px; list-style: none; display: grid; gap: 5px; font-size: .9rem; }
+.area li{ display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: baseline; }
+.area li .k{ color: var(--muted); font-size: .8rem; }
+.bars{ display: flex; gap: 2px; height: 10px; border-radius: 3px; overflow: hidden; margin: 8px 0 4px; }
+.bars i{ display: block; }
+#msg{ margin: 0; font-size: .9rem; color: var(--link); min-height: 1.3em; }
+#sources-box{ overflow-x: auto; }
+@media (max-width: 1000px){
+  html, body{ height: auto; }
+  body{ display: block; }
+  .bar{ padding: 8px 12px; }
+  .brand span{ display: none; }
+  .work{ display: block; }
+  .main, .side{ overflow: visible; }
+  .side{ border-left: 0; border-top: 1px solid var(--line); }
+  #sources{ min-width: 600px; }
+}
+</style>
+</head>
+<body>
+<div class="stripes" aria-hidden="true"></div>
+<header class="bar">
+  <a class="brand" href="/"><b>Pinpoint</b><span>ICAN research assistant</span></a>
+  <nav class="nav">
+    <a href="/">Cases</a>
+    <a href="/sources" class="on" id="src-link">Sources</a>
+  </nav>
+</header>
+
+<div class="work">
+  <main class="main">
+    <div class="top">
+      <h1>Sources</h1>
+      <p>Advocates get answers only from what is approved here. Add a source, check it against the publisher, and approve it.</p>
+    </div>
+
+    <section>
+      <div class="head"><h2>Search the sources</h2><span class="muted" id="find-count"></span></div>
+      <p class="muted" style="margin:0 0 10px">Finds the words you type in the text of every approved source, and filters the list below by title. No model is used.</p>
+      <label for="find" style="position:absolute;left:-9999px">Words to find in the approved sources</label>
+      <input id="find" type="search" placeholder="For example: disenrollment notice" autocomplete="off" style="width:100%;border:1px solid var(--line);border-radius:4px;background:var(--card);padding:9px 10px;font-size:.95rem">
+      <div class="queue" id="found" aria-live="polite" style="margin-top:10px"></div>
+    </section>
+
+    <section>
+      <div class="head">
+        <h2>Loaded sources</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="load-all" type="button">Load everything on the list</button><button class="btn ghost" id="approve-all" type="button">Approve all waiting</button><button class="btn ghost" id="check-all" type="button">Check all for changes</button></div>
+      </div>
+      <p id="msg"></p>
+      <div id="sources-box"><table id="sources">
+        <thead><tr><th>Source</th><th>Sections</th><th>Version</th><th>Status</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </section>
+
+    <section>
+        <div class="head"><h2>CSS&rsquo;s full list</h2><span class="muted" id="cat-count"></span></div>
+        <p class="muted" style="margin:0 0 10px">From the Track 1 brief. Loads: ecfr.gov, US Code and New York regulations on law.cornell.edu, DOH pages and PDFs. Cannot load yet: New York statutes on FindLaw and the Westlaw part-level links (bot wall), private SharePoint links, and index pages.</p>
+        <div class="cat" id="cat"></div>
+    </section>
+  </main>
+
+  <aside class="side" aria-label="Add a source, queue, questions and grades">
+    <section class="add">
+        <h2>Add a source</h2>
+        <p class="muted" style="margin:0">Paste a link to a part on ecfr.gov. It loads now and waits for approval. Other links are recorded for the loader to come.</p>
+        <div class="row"><input id="url" placeholder="https://www.ecfr.gov/current/title-42/part-460"><button class="btn" id="add" type="button">Add</button></div>
+        <p class="muted" style="margin:0">Try: <button class="link" type="button" data-try="https://www.ecfr.gov/current/title-42/part-460">42 CFR Part 460 (PACE)</button> · <button class="link" type="button" data-try="https://www.ecfr.gov/current/title-42/part-440">42 CFR Part 440 (services)</button></p>
+    </section>
+    <section>
+        <h2>Queue</h2>
+        <p class="muted" style="margin:0 0 10px">What advocates flagged, and sources that need a look.</p>
+        <div class="queue" id="queue"></div>
+    </section>
+    <section>
+        <h2>Questions and grades</h2>
+        <p class="muted" id="rec-count" style="margin:0 0 10px"></p>
+        <div id="rec-filter" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px"></div>
+        <div class="queue" id="record"></div>
+    </section>
+  </aside>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const longDate = iso => iso ? new Date(iso + 'T12:00:00').toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'}) : '';
+const toast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 2200); };
+const post = (path, body) => fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)}).then(r => r.json());
+const STATUS = {approved: ['ok', 'Approved'], review: ['warn', 'Awaiting approval'], changed: ['hot', 'Changed at the publisher'], retired: ['', 'Retired']};
+let data = null, rec = null, recFilter = 'all';
+const GRADE = {good: ['ok', 'Good'], bad: ['hot', 'Bad'], missing: ['warn', 'A source is missing']};
+const KIND = {answer: 'Answered', none: 'No answer in the sources', advice: 'Declined: asks for advice', clarify: 'Asked for the plan type'};
+
+let findTimer;
+$('find').oninput = () => {
+  const q = $('find').value.trim().toLowerCase();
+  document.querySelectorAll('#sources tbody tr').forEach(tr => {       // the list below, by title
+    tr.hidden = !!q && !q.split(/\s+/).every(w => tr.cells[0].textContent.toLowerCase().includes(w));
+  });
+  clearTimeout(findTimer);
+  findTimer = setTimeout(async () => {
+    if (q.length < 2){ $('found').innerHTML = ''; $('find-count').textContent = ''; return; }
+    const r = await (await fetch('/api/find?q=' + encodeURIComponent(q))).json();
+    if ($('find').value.trim().toLowerCase() !== q) return;            // a newer search is on its way
+    $('find-count').textContent = r.count ? `${r.count} passage${r.count === 1 ? '' : 's'}${r.count > r.rows.length ? ', first ' + r.rows.length + ' shown' : ''}` : 'No passage has these words';
+    $('found').innerHTML = r.rows.map(p =>
+      `<div class="item"><div class="row"><a href="${esc(p.url)}" target="_blank" rel="noopener"><b>${esc(p.cite)}</b></a><span class="muted">${esc(p.source)}</span></div>` +
+      `<span>${esc(p.part).replace(/\x01/g, '<mark>').replace(/\x02/g, '</mark>')}</span></div>`).join('');
+  }, 250);
+};
+
+function drawRecord(){
+  const c = rec.count;
+  $('rec-count').textContent = c.all ? `${c.all} question${c.all === 1 ? '' : 's'}: ${c.good} good, ${c.bad} bad, ${c.missing} with a source missing, ${c.none} not graded.` : 'No questions asked yet.';
+  $('rec-filter').innerHTML = [['all', 'All'], ['bad', 'Bad'], ['missing', 'Source missing'], ['none', 'Not graded']].map(([k, name]) =>
+    `<button class="link" data-rec="${k}" style="${k === recFilter ? 'font-weight:700;text-decoration:underline' : ''}">${name}</button>`).join('');
+  const rows = rec.asks.filter(a => recFilter === 'all' || (recFilter === 'none' ? !a.grade : a.grade === recFilter));
+  $('record').innerHTML = rows.length ? rows.map(a => {
+    const facts = Object.values(a.facts).filter(Boolean).join(' · ');
+    return `<div class="item"><div class="row"><b>${esc(KIND[a.kind] || a.kind)}</b><span class="muted">${esc(a.created.replace('T', ' ').slice(0, 16))}</span></div>` +
+      `<span class="q">“${esc(a.question)}”</span><span class="muted">${esc(a.case)}${facts ? ' · ' + esc(facts) : ''}</span>` +
+      (a.short ? `<span>${esc(a.short)}</span>` : '') + (a.cites.length ? `<span class="muted">${esc(a.cites.join('; '))}</span>` : '') +
+      (a.note ? `<span>Note: ${esc(a.note)}</span>` : '') +
+      (a.outcome ? `<span>Case outcome: ${esc(a.outcome)}${a.outcome_note ? '. ' + esc(a.outcome_note) : ''}</span>` : '') +
+      `<div class="row"><span class="muted">${a.seconds} s</span>${a.grade ? `<span class="tag ${GRADE[a.grade][0]}">${GRADE[a.grade][1]}</span>` : '<span class="muted">not graded</span>'}</div></div>`;
+  }).join('') : '<p class="muted" style="margin:0">Nothing here.</p>';
+}
+
+async function load(){
+  data = await (await fetch('/api/knowledge')).json();
+  fetch('/api/sources').then(r => r.json()).then(x => { $('src-link').textContent = `Sources (${x.sources.length})`; });   // the same count as on the Cases screen
+  // loaded sources
+  $('sources').querySelector('tbody').innerHTML = data.sources.map(s => {
+    const [cls, word] = STATUS[s.status] || ['', s.status];
+    let acts = '';
+    if (s.status === 'review') acts = `<button class="link" data-act="approved" data-id="${s.id}">Approve</button><button class="link" data-act="retired" data-id="${s.id}">Reject</button>`;
+    if (s.status === 'approved') acts = `<button class="link" data-act="check" data-id="${s.id}">Check</button><button class="link" data-act="retired" data-id="${s.id}">Retire</button>`;
+    if (s.status === 'changed') acts = `<button class="link" data-act="reload" data-id="${s.id}">Load the new version</button>`;
+    if (s.status === 'retired') acts = `<button class="link" data-act="approved" data-id="${s.id}">Restore</button>`;
+    const by = s.approved_by ? `<div class="muted">approved by ${esc(s.approved_by)} on ${longDate(s.approved_on)}</div>` : `<div class="muted">added ${longDate(s.added_on)}</div>`;
+    return `<tr><td><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>${by}</td><td>${s.sections}</td>` +
+      `<td>as of ${longDate(s.as_of)}<div class="muted">checked ${longDate(s.checked)}</div></td><td><span class="tag ${cls}">${word}</span></td><td class="acts">${acts}</td></tr>`;
+  }).join('');
+  // queue
+  const q = [];
+  for (const s of data.sources){
+    if (s.status === 'changed') q.push(`<div class="item"><div class="row"><b>Source changed at the publisher</b><span class="muted">${longDate(s.checked)}</span></div>${esc(s.name)}<div class="row"><span></span><button class="link" data-act="reload" data-id="${s.id}">Review and load</button></div></div>`);
+    if (s.status === 'review') q.push(`<div class="item"><div class="row"><b>New source awaiting approval</b><span class="muted">${longDate(s.added_on)}</span></div>${esc(s.name)}<div class="row"><span>${s.sections} sections</span><span><button class="link" data-act="approved" data-id="${s.id}">Approve</button> <button class="link" data-act="retired" data-id="${s.id}">Reject</button></span></div></div>`);
+  }
+  for (const f of data.flags){
+    const done = f.status !== 'open';
+    const title = f.kind === 'gap' ? (f.status === 'answered' ? 'Gap, now answered' : 'Gap flagged by an advocate') : 'Marked wrong or out of date';
+    q.push(`<div class="item ${f.kind} ${done ? 'done' : ''}"><div class="row"><b>${title}</b><span class="muted">${longDate(f.created)}</span></div>` +
+      `<span class="q">“${esc(f.question)}”</span>${f.plan ? `<span class="muted">Plan: ${esc(f.plan)}</span>` : ''}${f.cite ? `<span class="muted">${esc(f.cite)}</span>` : ''}${f.note ? `<span>${esc(f.note)}</span>` : ''}` +
+      `<div class="row"><span></span>${done ? `<span class="tag ok">${f.status}</span>` : `<button class="link" data-flag="${f.id}">Mark done</button>`}</div></div>`);
+  }
+  $('queue').innerHTML = q.length ? q.join('') : '<p class="muted" style="margin:0">Nothing waiting.</p>';
+  rec = await (await fetch('/api/record')).json(); drawRecord();
+  // the catalog
+  const areas = {};
+  for (const r of data.catalog) (areas[r.area] ||= []).push(r);
+  const total = data.catalog.length, loaded = data.catalog.filter(r => r.source).length;
+  $('cat-count').textContent = `${loaded} of ${total} links loaded`;
+  $('cat').innerHTML = Object.entries(areas).map(([area, rows]) => {
+    const n = rows.filter(r => r.source).length;
+    const bars = rows.map(r => `<i style="flex:1;background:${r.source ? 'var(--ok)' : r.loader === 'blocked' ? 'var(--red-soft)' : r.loader === 'skip' ? 'var(--line)' : 'var(--orange-soft)'}"></i>`).join('');
+    return `<details class="area"><summary><span style="color:var(--head);font-weight:700">${esc(area)}</span><span>${n} of ${rows.length} loaded</span></summary>` +
+      `<div class="bars" style="margin:0 14px">${bars}</div><ul>` + rows.map(r =>
+        `<li><span><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)}</a> <span class="k">${esc(r.kind)} · ${esc(r.level || '')}</span></span>` +
+        `<span>${r.source ? `<span class="tag ${STATUS[r.source.status][0]}">${STATUS[r.source.status][1]}</span>` : r.loader === 'blocked' ? `<span class="tag hot">Bot wall</span>` : r.loader === 'skip' ? `<span class="tag">Index or private</span>` : `<button class="link" data-add="${esc(r.url)}" data-name="${esc(r.name)}">Load</button>`}</span></li>`).join('') + '</ul></details>';
+  }).join('');
+}
+
+document.body.onclick = async e => {
+  const t = e.target;
+  if (t.dataset.try){ $('url').value = t.dataset.try; return; }
+  if (t.dataset.rec){ recFilter = t.dataset.rec; return drawRecord(); }
+  if (t.dataset.add){ return add(t.dataset.add, t.dataset.name); }
+  if (t.dataset.flag){ await post('/api/flag/status', {id: +t.dataset.flag, status: 'done'}); return load(); }
+  if (!t.dataset.act) return;
+  const id = +t.dataset.id;
+  if (t.dataset.act === 'check'){
+    t.textContent = 'Checking…'; const r = await post('/api/source/check', {id});
+    toast(r.results?.[id]?.changed ? 'The publisher has a newer version.' : `No change. Current as of ${longDate(r.results?.[id]?.as_of)}.`);
+  } else {
+    const r = await post('/api/source/status', {id, status: t.dataset.act});
+    if (r.now_answered?.length) toast(`${r.now_answered.length} flagged gap${r.now_answered.length > 1 ? 's' : ''} now ha${r.now_answered.length > 1 ? 've' : 's'} an answer.`);
+    else if (r.error) toast(r.error);
+  }
+  load();
+};
+async function add(url, name){
+  $('msg').textContent = 'Fetching…'; $('add').disabled = true;
+  const r = await post('/api/source/add', {url, name});
+  $('add').disabled = false;
+  $('msg').textContent = r.error ? r.error : 'Loaded. It is waiting for approval in the queue.';
+  if (!r.error) $('url').value = '';
+  load();
+}
+$('load-all').onclick = async () => {
+  const todo = data.catalog.filter(r => !r.source && !['blocked', 'skip'].includes(r.loader));
+  const seen = new Set(); let ok = 0, failed = [];
+  $('load-all').disabled = true;
+  for (const [i, r] of todo.entries()){
+    if (seen.has(r.url)) continue; seen.add(r.url);
+    $('msg').textContent = `Loading ${i + 1} of ${todo.length}: ${r.name}`;
+    const res = await post('/api/source/add', {url: r.url, name: r.name});
+    if (res.error && !/already in the list/.test(res.error)) failed.push(`${r.name}: ${res.error}`); else ok++;
+  }
+  $('load-all').disabled = false;
+  $('msg').textContent = `Loaded ${ok}. ${failed.length ? failed.length + ' could not be loaded: ' + failed.join(' · ') : ''}`;
+  load();
+};
+$('approve-all').onclick = async () => {
+  const r = await post('/api/source/approve-all', {});
+  if (r.now_answered?.length) toast(`${r.now_answered.length} flagged gap${r.now_answered.length > 1 ? 's' : ''} now ha${r.now_answered.length > 1 ? 've' : 's'} an answer.`);
+  load();
+};
+$('add').onclick = () => add($('url').value.trim());
+$('check-all').onclick = async () => {
+  $('check-all').textContent = 'Checking…'; $('check-all').disabled = true;
+  const r = await post('/api/source/check', {});
+  const changed = Object.values(r.results || {}).filter(x => x.changed).length;
+  $('msg').textContent = changed ? `${changed} source${changed > 1 ? 's have' : ' has'} a newer version at the publisher.` : `Checked ${Object.keys(r.results || {}).length} sources against ecfr.gov. No changes.`;
+  $('check-all').textContent = 'Check all for changes'; $('check-all').disabled = false;
+  load();
+};
+load();
+</script>
+</body>
+</html>

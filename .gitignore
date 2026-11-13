@@ -1,0 +1,6 @@
+shots-tmp/
+data/oracle.db
+__pycache__/
+learn/
+.venv/
+.env
