@@ -4,7 +4,7 @@ A case research tool for helpline advocates who work on Medicaid managed care ca
 
 Built for the [AI for Health Equity Design Sprint](https://datascience.columbia.edu/events/ai-health-equity-design-sprint), hosted by the Data Science Institute at Columbia University in November 2026, with the [Community Service Society of New York](https://www.cssny.org/) as community partner. Every case detail used with Pinpoint is made up.
 
-**Recorded demo:** https://mcheng.dev/pinpoint/. The two screens with answers recorded from the running tool on 2026-11-13. No model or server is behind it: pick one of the suggested questions and its recorded answer plays back. Cases, grades and outcomes are kept in your own browser.
+**Recorded demo:** https://pinpoint.mcheng.dev. The two screens with answers recorded from the running tool on 2026-11-13. No model or server is behind it: pick one of the suggested questions and its recorded answer plays back. Cases, grades and outcomes are kept in your own browser.
 
 ## What it looks like
 
